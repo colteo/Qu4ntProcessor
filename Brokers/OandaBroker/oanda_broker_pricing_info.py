@@ -1,0 +1,40 @@
+import oandapyV20
+import oandapyV20.endpoints.pricing as pricing
+from Services.DataFeed import DataFeed
+from Brokers.broker_pricing_info import BrokerPricingInfo
+
+
+class OandaBrokerPricingInfo(BrokerPricingInfo):
+
+    def __init__(self, args, account_id, access_token):
+        super().__init__(args)
+        self.account_id = account_id
+        self.access_token = access_token
+
+        # TODO rimuovere
+        self.params = {"instruments": "EUR_USD"}
+
+    def get_pricing_info(self):
+        client = oandapyV20.API(access_token=self.access_token)
+        r = pricing.PricingInfo(accountID=self.account_id, params=self.params)
+        client.request(r)
+        # print(json.dumps(r.response, indent=4, sort_keys=True))
+        return r.response
+
+    def get_current_middle_price(self, index):
+        pass
+
+    def get_current_ask(self):
+        pricing_info = self.get_pricing_info()
+        ask = float(pricing_info["prices"][0]["closeoutAsk"])
+        return ask
+
+    def get_current_bid(self):
+        pricing_info = self.get_pricing_info()
+        bid = float(pricing_info["prices"][0]["closeoutBid"])
+        return bid
+
+    def init_data_feed(self):
+        self.data_feed = DataFeed(self.args.parameters.data_feed)
+        self.data_main = self.data_feed.get_candles_by_count(5)
+
