@@ -1,17 +1,16 @@
 from Args import ArgsBacktest
 from Args import ArgsLive
-from Containers.Processors import ContainerProcessors
 from Domain.Enum import ProcessorType
 from Services.DrawPlot import DrawPlot
 from Services.Assistant import Assistant
 from Services.OutcomesManager import OutcomesManager
+from Processors import BacktestProcessor, LiveProcessor
 
 args = ArgsBacktest()
 # args = ArgsLive()
 
-containerProcessors = ContainerProcessors()
 if args.parameters.processor_type == ProcessorType.backtest:
-    processor = containerProcessors.backtest_processor_provider(args=args)
+    processor = BacktestProcessor(args=args)
     processor.run()
     DrawPlot(processor)
     outcomes_manager = OutcomesManager(
@@ -22,7 +21,7 @@ if args.parameters.processor_type == ProcessorType.backtest:
     )
     outcomes_manager.print_outcomes()
 elif args.parameters.processor_type == ProcessorType.live:
-    processor = containerProcessors.live_processor_provider(args=args)
+    processor = LiveProcessor(args=args)
 else:
     print("Error")
     exit()
