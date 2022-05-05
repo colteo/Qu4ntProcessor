@@ -33,6 +33,27 @@ Row = namedtuple(
     ]
 )
 
+RowNew = namedtuple(
+    "Row",
+    [
+        "Position",
+        "OpenTime",
+        "TradeAsk",
+        "TradeBid",
+        "TradeMiddle",
+        "Price",
+        "Margin",
+        "Units",
+        "OrderType",
+        "CloseTime",
+        "OrderAsk",
+        "OrderBid",
+        "OrderMiddle",
+        "Initial",
+        "Final",
+    ]
+)
+
 
 class HTMLPrinter(BaseObject):
 
@@ -43,7 +64,44 @@ class HTMLPrinter(BaseObject):
         self.data_main = data_main
         self.data_stream = data_stream
 
-        self.print_outcomes()
+        # self.print_outcomes()
+        self.print_outcomes_new()
+
+    def print_outcomes_new(self):
+        env = Environment(loader=FileSystemLoader("Services/OutcomesManager/"))
+        template = env.get_template("TableTemplateNew.html")  # the template file name
+        context_data = {
+            'tabular_data': []
+        }
+
+        for outcome in self.outcomes:
+            row = RowNew(
+                outcome.trade.position_type,
+                outcome.trade.open_time,
+                outcome.trade.stream_row.Ask,
+                outcome.trade.stream_row.Bid,
+                round((outcome.trade.stream_row.Ask + outcome.trade.stream_row.Bid) / 2, 5),
+                outcome.trade.price,
+                round(outcome.trade.margin_used, 2),
+                outcome.trade.units,
+                outcome.order.order_type,
+                outcome.order.stream_row.Time,
+                outcome.order.stream_row.Ask,
+                outcome.order.stream_row.Bid,
+                round((outcome.order.stream_row.Ask + outcome.order.stream_row.Bid) / 2, 5),
+                round(outcome.initial_balance, 2),
+                round(outcome.final_balance, 2)
+            )
+
+            context_data["tabular_data"].append(row)
+
+        html = template.render(**context_data)
+        with tempfile.NamedTemporaryFile('w', delete=False, suffix='.html') as f:
+            url = 'file://' + f.name
+            f.write(html)
+        webbrowser.open(url)
+
+        pass
 
     def print_outcomes(self):
         env = Environment(loader=FileSystemLoader("Services/OutcomesManager/"))
@@ -55,6 +113,9 @@ class HTMLPrinter(BaseObject):
 
         for index, row in self.data_stream.reset_index().iterrows():
             row_data_main = self.get_row_data_main_by_open_time(row.Time)
+            print(row.Time)
+            print(row_data_main)
+            print("-----------")
             outcome = self.get_outcome_by_open_time(row.Time)
 
             ask_class = bid_class = difference = ""
@@ -67,9 +128,6 @@ class HTMLPrinter(BaseObject):
 
             if self.last_outcome is not None and row.Time == self.last_outcome.order.stream_row.Time:
                 self.last_outcome = None
-
-            if row_data_main is not None:
-                print(row_data_main.iloc[0].Open)
 
             row = Row(
                 row.Time,

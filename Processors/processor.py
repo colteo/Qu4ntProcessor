@@ -85,11 +85,11 @@ class Processor(BaseObject):
         capire live
         """
 
-        self.telegram.send("evento ricevuto")
+        # self.telegram.send("evento ricevuto")
 
-        print("evento ricevuto")
+        # print("evento ricevuto")
 
-        print(position_type)
+        # print(position_type)
         if position_type is PositionType.LONG:
             units = 10000
         elif position_type is PositionType.SHORT:

@@ -12,7 +12,7 @@ args = ArgsBacktest()
 if args.parameters.processor_type == ProcessorType.backtest:
     processor = BacktestProcessor(args=args)
     processor.run()
-    DrawPlot(processor)
+    # DrawPlot(processor)
     outcomes_manager = OutcomesManager(
         args,
         processor.broker.pricing.data_main,

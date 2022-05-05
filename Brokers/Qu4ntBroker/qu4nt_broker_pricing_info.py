@@ -67,3 +67,4 @@ class Qu4ntBrokerPricingInfo(BrokerPricingInfo, metaclass=Singleton):
         self.data_feed = DataFeed(self.args.parameters.data_feed)
         self.data_main = self.data_feed.get_data_main_by_date_middle_price()
         self.data_stream = self.data_feed.get_data_stream_by_date_ask_and_price()
+
