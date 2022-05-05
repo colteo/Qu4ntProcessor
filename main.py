@@ -19,7 +19,7 @@ if args.parameters.processor_type == ProcessorType.backtest:
         processor.broker.pricing.data_stream,
         processor.broker.outcomes,
     )
-    outcomes_manager.print_outcomes()
+
 elif args.parameters.processor_type == ProcessorType.live:
     processor = LiveProcessor(args=args)
 else:

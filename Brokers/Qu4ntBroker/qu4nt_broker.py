@@ -59,13 +59,13 @@ class Qu4ntBroker(Broker):
             '''
             se la posizione è long prendo stop loss quando il prezzo di data stream è minore del prezzo dell'ordine
             '''
-            # print("sei nello stop loss")
+            print("sei in stop loss LONG bid: {} | order price: {}".format(row.Bid, order.price))
             return self.close_trade(trade, order, row)
         elif trade.position_type == PositionType.SHORT and row.Ask >= order.price:
             '''
             se la posizione è short prendo stop loss quando il prezzo di data stream è maggiore del prezzo dell'ordine
             '''
-            # print("sei nello stop loss")
+            print("sei in stop loss SHORT ask: {} | order price: {}".format(row.Ask, order.price))
             return self.close_trade(trade, order, row)
 
     def check_order_take_profit(self, trade, order, row):
@@ -73,13 +73,13 @@ class Qu4ntBroker(Broker):
             '''
             se la posizione è long prendo take profit quando il prezzo di data stream è maggiore del prezzo dell'ordine
             '''
-            # print("sei nel take profit")
+            print("sei in take profit LONG bid: {} | order price: {}".format(row.Bid, order.price))
             return self.close_trade(trade, order, row)
         elif trade.position_type == PositionType.SHORT and row.Ask <= order.price:
             '''
             se la posizione è short prendo take profit quando il prezzo di data stream è minore del prezzo dell'ordine
             '''
-            # print("sei nel take profit")
+            print("sei in take profit SHORT ask: {} | order price: {}".format(row.Ask, order.price))
             return self.close_trade(trade, order, row)
         pass
 

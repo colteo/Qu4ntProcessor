@@ -4,7 +4,8 @@ from Base import BaseObject
 from Domain.Enum import PositionType
 from Domain.Enum import ProcessorType
 from Domain.Enum import OrderType
-from Services.Assistant import AssistantDataframe
+from Services.Assistant import AssistantDataframe, Assistant
+from Services.Communications import Telegram
 from Brokers import OandaBroker, Qu4ntBroker
 from Strategies import *
 from Domain.Enum import InstrumentType
@@ -15,10 +16,13 @@ class Processor(BaseObject):
         super().__init__()
         self.strategy = None
         self.broker = None
+        self.telegram = None
         self.args = args
 
         self.init_broker()
         self.init_strategy()
+
+        self.init_communicator()
 
     def run(self):
         self.logger.write_info(
@@ -67,6 +71,9 @@ class Processor(BaseObject):
 
         self.strategy.strategy_event += self.event_received
 
+    def init_communicator(self):
+        self.telegram = Telegram()
+
     def event_received(self, position_type, stop_loss=None, take_profit=None, trailing_profit=None):
         """
         Questo metodo fa da intermediario, tra broker e strategy.
@@ -77,7 +84,10 @@ class Processor(BaseObject):
         Il che dovrebbe essere corretto per i backtest.
         capire live
         """
-        # print("evento ricevuto")
+
+        self.telegram.send("evento ricevuto")
+
+        print("evento ricevuto")
 
         print(position_type)
         if position_type is PositionType.LONG:
