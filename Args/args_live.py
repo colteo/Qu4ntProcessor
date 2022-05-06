@@ -29,7 +29,7 @@ strategy = StrategyModel(
 
 data_feed = DataFeedModel(
     InstrumentType.eurusd,
-    GranularityType.S5,
+    GranularityType.M5,
     count=10,
 )
 

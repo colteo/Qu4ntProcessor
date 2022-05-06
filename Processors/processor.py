@@ -88,9 +88,24 @@ class Processor(BaseObject):
         # print("evento ricevuto")
         # print(position_type)
         if position_type is PositionType.LONG:
-            units = 10000
+            units = self.strategy.sizer.calc_units(
+                self.broker.account.get_margin_available(),
+                self.broker.account.get_leverage(),
+                self.broker.pricing.get_current_ask(),
+            )
+            print(units)
+
+            # units = 10000
         elif position_type is PositionType.SHORT:
-            units = -10000
+            units = self.strategy.sizer.calc_units(
+                self.broker.account.get_margin_available(),
+                self.broker.account.get_leverage(),
+                self.broker.pricing.get_current_ask(),
+            )
+            units = -units
+            print(units)
+
+            # units = -10000
 
         result, response = self.broker.market_order_request(
             InstrumentType.eurusd.value,
