@@ -22,7 +22,9 @@ strategy = StrategyModel(
                 "candles": ["three", "two", "one"]
             },
         )
-    ]
+    ],
+    35,
+    43
 )
 
 data_feed = DataFeedModel(

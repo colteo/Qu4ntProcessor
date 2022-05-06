@@ -14,6 +14,10 @@ class Strategy(BaseObject):
     def __init__(self, args):
         super().__init__()
         self.args = args
+
+        self.stop_loss = self.args.parameters.strategy.stop_loss
+        self.take_profit = self.args.parameters.strategy.take_profit
+
         self.df = None
 
         self.strategy_event = EventHook()

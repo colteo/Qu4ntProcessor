@@ -84,11 +84,8 @@ class Processor(BaseObject):
         Il che dovrebbe essere corretto per i backtest.
         capire live
         """
-
         # self.telegram.send("evento ricevuto")
-
         # print("evento ricevuto")
-
         # print(position_type)
         if position_type is PositionType.LONG:
             units = 10000
@@ -100,7 +97,13 @@ class Processor(BaseObject):
             units
         )
         if result:
-            self.broker.take_profit_order_request(response, 50)
-            self.broker.stop_loss_order_request(response, 15)
+            self.broker.stop_loss_order_request(
+                response,
+                self.strategy.stop_loss
+            )
+            self.broker.take_profit_order_request(
+                response,
+                self.strategy.take_profit
+            )
 
 
