@@ -6,4 +6,15 @@ class StrategyModel:
         self.stop_loss = stop_loss
         self.take_profit = take_profit
 
+    def reprJSON(self):
+        indicators_dict = {}
+        for index, indicator in enumerate(self.indicators):
+            indicators_dict[index] = indicator.reprJSON()
+
+        return dict(
+            strategy_name=self.strategy_name,
+            indicators=indicators_dict,
+            stop_loss=self.stop_loss,
+            take_profit=self.take_profit,
+        )
 

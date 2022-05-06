@@ -15,9 +15,9 @@ if args.parameters.processor_type == ProcessorType.backtest:
     # DrawPlot(processor)
     outcomes_manager = OutcomesManager(
         args,
-        processor.broker.pricing.data_main,
-        processor.broker.pricing.data_stream,
-        processor.broker.outcomes,
+        processor,
+        print_html=True,
+        send_result_to_server_api=True
     )
 
 elif args.parameters.processor_type == ProcessorType.live:

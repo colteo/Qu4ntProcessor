@@ -1,5 +1,6 @@
 from Base import BaseObject
 from Singleton import Singleton
+import json
 import inspect
 import requests
 import configparser
@@ -26,6 +27,11 @@ class ServerAPI(BaseObject):
         except:
             self.logger.write_error("Server API non configurato", self.__class__.__name__, inspect.stack()[0][3])
 
-    def send(self, url, data):
-
-        pass
+    def post_request(self, url, data, headers):
+        response = requests.post(
+            url,
+            data=data,
+            headers=headers
+        )
+        content = response.content
+        return content

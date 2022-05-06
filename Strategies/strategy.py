@@ -7,6 +7,7 @@ from Domain.Enum import OrderType
 
 # ATTENZIONE: non eliminare la seguente riga
 from Indicators import *
+import uuid
 
 
 class Strategy(BaseObject):
@@ -14,6 +15,8 @@ class Strategy(BaseObject):
     def __init__(self, args):
         super().__init__()
         self.args = args
+
+        self.id = str(uuid.uuid4())
 
         self.stop_loss = self.args.parameters.strategy.stop_loss
         self.take_profit = self.args.parameters.strategy.take_profit
