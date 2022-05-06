@@ -10,17 +10,18 @@ se vengono passati sia count che start_date e end_date le date prevalgono sul co
 
 class DataFeedModel:
 
-    def __init__(self, instrument, granularity, count=None, start_date=None, end_date=None):
+    def __init__(self, instrument, granularity, count=None, start_date=None, end_date=None, stream_granularity=GranularityType.M1):
         self.instrument = None
         self.granularity = None
         self.count = None
         self.start_date = None
         self.end_date = None
+        self.stream_granularity = None
         self.type = None
-        self.init_values(instrument, granularity, count, start_date, end_date)
+        self.init_values(instrument, granularity, count, start_date, end_date, stream_granularity)
         self.define_type()
 
-    def init_values(self, instrument, granularity, count, start_date, end_date):
+    def init_values(self, instrument, granularity, count, start_date, end_date, stream_granularity):
         if isinstance(instrument, InstrumentType):
             self.instrument = instrument
 
@@ -55,6 +56,9 @@ class DataFeedModel:
                 res = False
             if res:
                 self.end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        if stream_granularity is not None:
+            self.stream_granularity = stream_granularity
 
     def define_type(self):
         # TODO verificare se serve o no

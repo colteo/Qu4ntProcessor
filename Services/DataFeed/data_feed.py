@@ -124,7 +124,8 @@ class DataFeed:
 
     # BID, ASK (middle)
     def get_data_stream_by_date_ask_and_price(self):
-        data_stream_granularity = GranularityType.M30.value
+        # data_stream_granularity = GranularityType.M1.value
+        data_stream_granularity = self.model.stream_granularity.value
         datapath = self.get_data_path(
             self.model.instrument,
             self.model.start_date,

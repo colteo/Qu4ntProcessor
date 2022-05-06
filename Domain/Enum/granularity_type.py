@@ -6,6 +6,7 @@ class GranularityType(Enum):
     H1 = 'H1'
     M15 = 'M15'
     M30 = 'M30'
+    M1 = 'M1'
     S15 = 'S15'
     S5 = 'S5'
 
