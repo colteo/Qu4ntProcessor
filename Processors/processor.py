@@ -90,10 +90,10 @@ class Processor(BaseObject):
                 if result:
                     self.broker.order_manager.close_related_orders_by_trade_id(trade.trade_id)
 
-                self.open(position_type)
+                self.open_trade(position_type)
         elif len(trades) == 0:
             # print("sei nella if trades == 0")
-            self.open(position_type)
+            self.open_trade(position_type)
         elif len(trades) > 1:
             # TODO chiudere tutto
             print("sei nella else trades > 1")
