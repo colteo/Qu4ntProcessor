@@ -84,16 +84,11 @@ class Qu4ntBroker(Broker):
         pass
 
     def close_trade(self, trade, order, row):
+        # questo metodo deve solo chiudere l'ordine e salvare l'outcome
         initial_balance = self.account.get_balance()
+        trade_amount = self.calc_trade_produced_amount(trade, order, row)
+        self.account.set_balance(initial_balance + trade_amount)
 
-        pips = self.calc_pips_difference(trade, row)
-        # print(pips)
-        pips_value = self.calc_pips_value(trade, row, pips)
-        # print(pips_value)
-        if order.order_type is OrderType.TAKE_PROFIT:
-            self.account.set_balance(self.account.get_balance() + pips_value)
-        elif order.order_type is OrderType.STOP_LOSS:
-            self.account.set_balance(self.account.get_balance() - pips_value)
         self.account.set_margin_available(self.account.get_balance())
 
         self.trade_manager.close_trade_by_id(trade.trade_id)
@@ -118,6 +113,18 @@ class Qu4ntBroker(Broker):
         elif trade.position_type == PositionType.LONG:
             diff = row.Bid - trade.price
         return abs(diff * multipler)
+
+    def calc_trade_produced_amount(self, trade, order, row):
+        pips = self.calc_pips_difference(trade, row)
+
+        if trade.position_type == PositionType.LONG and row.Bid <= order.price:
+            return -self.calc_pips_value(trade, row, pips)
+        elif trade.position_type == PositionType.SHORT and row.Ask >= order.price:
+            return -self.calc_pips_value(trade, row, pips)
+        elif trade.position_type == PositionType.LONG and row.Bid >= order.price:
+            return self.calc_pips_value(trade, row, pips)
+        elif trade.position_type == PositionType.SHORT and row.Ask <= order.price:
+            return self.calc_pips_value(trade, row, pips)
 
     def calc_pips_value(self, trade, row, pips):
         # https://www.cashbackforex.com/tools/pip-calculator/EURUSD#:~:text=The%201%20pip%20size%20of,the%205%20represents%205%20pips.
