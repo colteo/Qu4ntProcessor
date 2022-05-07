@@ -8,8 +8,8 @@ from Domain.Enum import InstrumentType
 from Domain.Enum import GranularityType
 
 strategy = StrategyModel(
-    "EngulfingStrategy",
-    [
+    strategy_name="EngulfingStrategy",
+    indicators=[
         IndicatorModel(
             "EngulfingBullishIndicator",
             {
@@ -23,8 +23,8 @@ strategy = StrategyModel(
             },
         )
     ],
-    60,
-    20
+    stop_loss=20,
+    take_profit=60
 )
 
 data_feed = DataFeedModel(
