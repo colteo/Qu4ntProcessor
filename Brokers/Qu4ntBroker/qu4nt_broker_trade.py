@@ -1,10 +1,11 @@
 from Domain.Enum import PositionType
 from Services.Assistant import Assistant
-from Domain.Entities import TradeModel
+from Domain.Entities import TradeModel, OutcomeModel
 from Singleton import Singleton
 from .qu4nt_broker_account import Qu4ntBrokerAccount
 from .qu4nt_broker_pricing_info import Qu4ntBrokerPricingInfo
 from Domain.Enum import Status
+from Domain.Enum import OrderType
 
 
 class Qu4ntBrokerTrade(metaclass=Singleton):
@@ -14,6 +15,7 @@ class Qu4ntBrokerTrade(metaclass=Singleton):
         self.account = Qu4ntBrokerAccount()
         self.pricing = Qu4ntBrokerPricingInfo()
         self.trades = []
+        self.outcomes = []
         pass
 
     def create_trade(self, data):
@@ -88,6 +90,71 @@ class Qu4ntBrokerTrade(metaclass=Singleton):
     def get_open_trade(self):
         return [trade for trade in self.trades if trade.state is Status.OPEN]
 
-    def close_trade_by_id(self, trade_id):
-        trade = self.get_trade_by_id(trade_id)
+    def change_state_to_closed(self, trade):
         trade.state = Status.CLOSED
+
+    def close_trade_without_order(self, trade, order):
+        # Assistant.print_object(trade)
+        # Assistant.print_object(order)
+        row = self.pricing.get_current_price()
+        return self.close_trade(trade, order, row)
+
+    def close_trade(self, trade, order, row):
+        # questo metodo deve solo chiudere l'ordine e salvare l'outcome
+        initial_balance = self.account.get_balance()
+        trade_amount = self.calc_trade_produced_amount(trade, order, row)
+        self.account.set_balance(initial_balance + trade_amount)
+
+        self.account.set_margin_available(self.account.get_balance())
+
+        self.change_state_to_closed(trade)
+
+        order.set_stream_row(row)
+        outcome = OutcomeModel(
+            trade=trade,
+            order=order,
+            initial_balance=initial_balance,
+            final_balance=self.account.get_balance()
+        )
+        self.outcomes.append(outcome)
+
+        return True
+
+    def calc_pips_difference(self, trade, row):
+        # TODO : multipler will change based on currency cross
+        multipler = 10000
+        if trade.position_type == PositionType.SHORT:
+            diff = row.Ask - trade.price
+        elif trade.position_type == PositionType.LONG:
+            diff = row.Bid - trade.price
+        return abs(diff * multipler)
+
+    def calc_trade_produced_amount(self, trade, order, row):
+        pips = self.calc_pips_difference(trade, row)
+
+        if order.order_type is OrderType.STOP_LOSS or order.order_type is OrderType.TAKE_PROFIT:
+            price = order.price
+        elif order.order_type is OrderType.FORCED_CLOSURE:
+            price = trade.price
+
+        if trade.position_type == PositionType.LONG and row.Bid <= price:
+            return -self.calc_pips_value(trade, row, pips)
+        elif trade.position_type == PositionType.SHORT and row.Ask >= price:
+            return -self.calc_pips_value(trade, row, pips)
+        elif trade.position_type == PositionType.LONG and row.Bid >= price:
+            return self.calc_pips_value(trade, row, pips)
+        elif trade.position_type == PositionType.SHORT and row.Ask <= price:
+            return self.calc_pips_value(trade, row, pips)
+
+    def calc_pips_value(self, trade, row, pips):
+        # https://www.cashbackforex.com/tools/pip-calculator/EURUSD#:~:text=The%201%20pip%20size%20of,the%205%20represents%205%20pips.
+        # the pip value price is calculated using the current exchange price (mid price)
+        middle_price = (row.Ask + row.Bid) / 2
+        one_pip_value = self.calc_pip_value(trade, middle_price)
+        return pips * one_pip_value
+
+    def calc_pip_value(self, trade, middle_price):
+        multipler = 0.0001
+        return abs((trade.units * multipler) / middle_price)
+
+

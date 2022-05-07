@@ -12,7 +12,7 @@ class OutcomesManager(BaseObject):
         super().__init__()
         self.args = args
         self.processor = processor
-        self.outcomes = processor.broker.outcomes
+        self.outcomes = processor.broker.trade_manager.outcomes
         self.data_main = processor.broker.pricing.data_main
         self.data_stream = processor.broker.pricing.data_stream
         self.check_url = None

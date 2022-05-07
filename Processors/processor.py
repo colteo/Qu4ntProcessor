@@ -4,11 +4,13 @@ from Base import BaseObject
 from Domain.Enum import PositionType
 from Domain.Enum import ProcessorType
 from Domain.Enum import OrderType
+from Domain.Enum import Status
 from Services.Assistant import AssistantDataframe, Assistant
 from Services.Communications import Telegram
 from Brokers import OandaBroker, Qu4ntBroker
 from Strategies import *
 from Domain.Enum import InstrumentType
+from Domain.Entities import OrderModel
 
 
 class Processor(BaseObject):
@@ -68,43 +70,55 @@ class Processor(BaseObject):
         print("evento ricevuto")
 
         trades = self.broker.trade_manager.get_open_trade()
-        if len(trades) == 0:
-            pass
-
         if len(trades) == 1:
-            print("sei nella if trades == 1")
+            # print("sei nella if trades == 1")
             trade = trades[0]
 
             if position_type is trade.position_type:
                 return
             else:
-                # TODO chiudere il trade aperto
-
-                Assistant.print_object(trade)
-
-                units = self.calc_units(position_type)
-                if units is None:
-                    return
-
-                result, response = self.broker.market_order_request(
-                    InstrumentType.eurusd.value,
-                    units
+                result = self.broker.trade_manager.close_trade_without_order(
+                    trade=trade,
+                    order=OrderModel(
+                        order_id=len(self.broker.order_manager.orders),
+                        trade_id=trade.trade_id,
+                        price=None,
+                        state=Status.OPEN,
+                        order_type=OrderType.FORCED_CLOSURE
+                    )
                 )
                 if result:
-                    self.broker.stop_loss_order_request(
-                        response,
-                        self.strategy.stop_loss
-                    )
-                    self.broker.take_profit_order_request(
-                        response,
-                        self.strategy.take_profit
-                    )
+                    self.broker.order_manager.close_related_orders_by_trade_id(trade.trade_id)
 
+                self.open(position_type)
+        elif len(trades) == 0:
+            # print("sei nella if trades == 0")
+            self.open(position_type)
         elif len(trades) > 1:
             # TODO chiudere tutto
             print("sei nella else trades > 1")
             self.logger.write_error("Errore ho trovato più di un trade aperto", self.__class__.__name__, inspect.stack()[0][3])
             exit()
+
+    def open_trade(self, position_type):
+        units = self.calc_units(position_type)
+        if units is None:
+            return
+
+        result, response = self.broker.market_order_request(
+            InstrumentType.eurusd.value,
+            units
+        )
+        if result:
+            self.broker.stop_loss_order_request(
+                response,
+                self.strategy.stop_loss
+            )
+            self.broker.take_profit_order_request(
+                response,
+                self.strategy.take_profit
+            )
+        pass
 
     def calc_units(self, position_type):
         units = 0
