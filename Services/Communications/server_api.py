@@ -28,10 +28,12 @@ class ServerAPI(BaseObject):
             self.logger.write_error("Server API non configurato", self.__class__.__name__, inspect.stack()[0][3])
 
     def post_request(self, url, data, headers):
-        response = requests.post(
-            url,
-            data=data,
-            headers=headers
-        )
-        content = response.content
-        return content
+        if self.__is_on:
+            response = requests.post(
+                url,
+                data=data,
+                headers=headers
+            )
+            content = response.content
+            return content
+        return None

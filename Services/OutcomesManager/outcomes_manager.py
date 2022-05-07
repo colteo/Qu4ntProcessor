@@ -24,9 +24,10 @@ class OutcomesManager(BaseObject):
             self.server_api = ServerAPI()
 
             strategy_id = self.create_strategy()
-            for outcome in self.outcomes:
-                self.send_outcome(outcome, strategy_id)
-            self.set_strategy_final_cash(strategy_id)
+            if strategy_id is not None:
+                for outcome in self.outcomes:
+                    self.send_outcome(outcome, strategy_id)
+                self.set_strategy_final_cash(strategy_id)
 
     def create_strategy(self):
         post_data = {}
@@ -55,6 +56,8 @@ class OutcomesManager(BaseObject):
             data=post_data,
             headers=headers
         )
+        if content is None:
+            return None
         data = json.loads(content)
         return data["result"]["id"]
 
