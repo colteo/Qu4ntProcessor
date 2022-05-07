@@ -113,9 +113,9 @@ class HTMLPrinter(BaseObject):
 
         for index, row in self.data_stream.reset_index().iterrows():
             row_data_main = self.get_row_data_main_by_open_time(row.Time)
-            print(row.Time)
-            print(row_data_main)
-            print("-----------")
+            # print(row.Time)
+            # print(row_data_main)
+            # print("-----------")
             outcome = self.get_outcome_by_open_time(row.Time)
 
             ask_class = bid_class = difference = ""

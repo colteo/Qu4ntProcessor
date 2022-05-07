@@ -30,9 +30,10 @@ strategy = StrategyModel(
 
 data_feed = DataFeedModel(
     InstrumentType.eurusd,
-    GranularityType.D,
-    start_date=datetime.datetime(2021, 1, 1, 0, 0, 0),
-    end_date=datetime.datetime(2021, 12, 31, 0, 0, 0),
+    GranularityType.M15,
+    start_date=datetime.datetime(2022, 2, 1, 0, 0, 0),
+    end_date=datetime.datetime(2022, 2, 14, 0, 0, 0),
+    stream_granularity=GranularityType.M1
 )
 
 args_qu4nt = {

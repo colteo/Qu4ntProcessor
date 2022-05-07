@@ -68,28 +68,43 @@ class Processor(BaseObject):
         print("evento ricevuto")
 
         trades = self.broker.trade_manager.get_open_trade()
-        if trades is not None:
-            for trade in trades:
+        if len(trades) == 0:
+            pass
+
+        if len(trades) == 1:
+            print("sei nella if trades == 1")
+            trade = trades[0]
+
+            if position_type is trade.position_type:
+                return
+            else:
+                # TODO chiudere il trade aperto
+
                 Assistant.print_object(trade)
 
-        units = self.calc_units(position_type)
+                units = self.calc_units(position_type)
+                if units is None:
+                    return
 
-        if units is None:
-            return
+                result, response = self.broker.market_order_request(
+                    InstrumentType.eurusd.value,
+                    units
+                )
+                if result:
+                    self.broker.stop_loss_order_request(
+                        response,
+                        self.strategy.stop_loss
+                    )
+                    self.broker.take_profit_order_request(
+                        response,
+                        self.strategy.take_profit
+                    )
 
-        result, response = self.broker.market_order_request(
-            InstrumentType.eurusd.value,
-            units
-        )
-        if result:
-            self.broker.stop_loss_order_request(
-                response,
-                self.strategy.stop_loss
-            )
-            self.broker.take_profit_order_request(
-                response,
-                self.strategy.take_profit
-            )
+        elif len(trades) > 1:
+            # TODO chiudere tutto
+            print("sei nella else trades > 1")
+            self.logger.write_error("Errore ho trovato più di un trade aperto", self.__class__.__name__, inspect.stack()[0][3])
+            exit()
 
     def calc_units(self, position_type):
         units = 0
