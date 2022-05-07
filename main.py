@@ -22,6 +22,7 @@ if args.parameters.processor_type == ProcessorType.backtest:
 
 elif args.parameters.processor_type == ProcessorType.live:
     processor = LiveProcessor(args=args)
+    processor.run()
 else:
     print("Error")
     exit()

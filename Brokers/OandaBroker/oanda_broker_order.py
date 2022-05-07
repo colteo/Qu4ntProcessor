@@ -1,5 +1,6 @@
 from Services.Assistant import Assistant
 from Brokers.broker_order import BrokerOrder
+import json
 import oandapyV20
 import oandapyV20.endpoints.orders as orders
 from oandapyV20.contrib.requests import MarketOrderRequest, TakeProfitOrderRequest, StopLossOrderRequest

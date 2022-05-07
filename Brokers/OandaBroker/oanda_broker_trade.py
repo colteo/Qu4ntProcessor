@@ -32,6 +32,7 @@ class OandaTradeBroker:
             r.response["trade"]["price"],
             r.response["trade"]["marginUsed"],
             r.response["trade"]["state"],
+            None
         )
 
     def close_all_trade(self):
@@ -59,5 +60,6 @@ class OandaTradeBroker:
                 trade["price"],
                 trade["initialMarginRequired"],
                 trade["state"],
+                None
             )
             list_of_trade.append(new_trade)
