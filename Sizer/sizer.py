@@ -21,6 +21,9 @@ class Sizer(BaseObject):
         # print(leverage)
         # print(price)
 
+        if price is None:
+            return None
+
         if self.type_of_money_management is MoneyManagementType.ALL_IN:
             # impostato a 0.95 per evitare errori tipo fondi non sufficienti
             multiplier = 0.95

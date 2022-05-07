@@ -32,7 +32,7 @@ data_feed = DataFeedModel(
     InstrumentType.eurusd,
     GranularityType.D,
     start_date=datetime.datetime(2021, 1, 1, 0, 0, 0),
-    end_date=datetime.datetime(2021, 1, 31, 0, 0, 0),
+    end_date=datetime.datetime(2021, 12, 31, 0, 0, 0),
 )
 
 args_qu4nt = {

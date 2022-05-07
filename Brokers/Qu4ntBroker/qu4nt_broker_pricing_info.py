@@ -22,16 +22,24 @@ class Qu4ntBrokerPricingInfo(BrokerPricingInfo, metaclass=Singleton):
             return False, None
 
     def get_last_middle_price(self):
-        price = self.data_main.reset_index().iloc[self.index]
-        return price
+        try:
+            price = self.data_main.reset_index().iloc[self.index]
+            return price
+        except:
+            return None
+
 
     def get_current_ask(self):
         result = self.get_current_price()
+        if result is None:
+            return None
         # print(result.Time)
         return result.Ask
 
     def get_current_bid(self):
         result = self.get_current_price()
+        if result is None:
+            return None
         # print(result.Time)
         return result.Bid
 
@@ -41,6 +49,8 @@ class Qu4ntBrokerPricingInfo(BrokerPricingInfo, metaclass=Singleton):
         quindi prendiamo il primo valore utile
         '''
         last = self.get_last_middle_price()
+        if last is None:
+            return None
         df = self.data_stream.reset_index().loc[self.data_stream.index >= last.Time]
         return df.iloc[0]
 

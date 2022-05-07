@@ -72,9 +72,14 @@ class Processor(BaseObject):
             for trade in trades:
                 Assistant.print_object(trade)
 
+        units = self.calc_units(position_type)
+
+        if units is None:
+            return
+
         result, response = self.broker.market_order_request(
             InstrumentType.eurusd.value,
-            self.calc_units(position_type)
+            units
         )
         if result:
             self.broker.stop_loss_order_request(
