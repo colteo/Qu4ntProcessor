@@ -6,6 +6,7 @@ from .qu4nt_broker_account import Qu4ntBrokerAccount
 from .qu4nt_broker_pricing_info import Qu4ntBrokerPricingInfo
 from Domain.Enum import Status
 from Domain.Enum import OrderType
+from Domain.Entities import OrderModel
 
 
 class Qu4ntBrokerTrade(metaclass=Singleton):
@@ -56,9 +57,6 @@ class Qu4ntBrokerTrade(metaclass=Singleton):
         self.trades.append(trade)
         return True, trade.trade_id
 
-    def close_all_trade(self):
-        print("Metodo close_all_trade non implementato")
-
     def order_can_be_opened(self, position_type, instrument, units):
         if self.check_margin(position_type, instrument, units):
             return True, "OK"
@@ -93,32 +91,42 @@ class Qu4ntBrokerTrade(metaclass=Singleton):
     def change_state_to_closed(self, trade):
         trade.state = Status.CLOSED
 
-    def close_trade_without_order(self, trade, order):
-        # Assistant.print_object(trade)
-        # Assistant.print_object(order)
-        row = self.pricing.get_current_price()
-        return self.close_trade(trade, order, row)
+    def close_all_trade(self):
+        _trades = self.get_open_trade()
+        for trade in _trades:
+            self.close_trade(
+                trade=trade,
+                order=OrderModel(
+                    order_id=0,
+                    trade_id=trade.trade_id,
+                    price=None,
+                    state=Status.OPEN,
+                    order_type=OrderType.FORCED_CLOSURE
+                ),
+                row=self.pricing.get_current_price(),
+            )
 
     def close_trade(self, trade, order, row):
         # questo metodo deve solo chiudere l'ordine e salvare l'outcome
-        initial_balance = self.account.get_balance()
-        trade_amount = self.calc_trade_produced_amount(trade, order, row)
-        self.account.set_balance(initial_balance + trade_amount)
+        if trade.state is Status.OPEN:
+            initial_balance = self.account.get_balance()
+            trade_amount = self.calc_trade_produced_amount(trade, order, row)
+            self.account.set_balance(initial_balance + trade_amount)
 
-        self.account.set_margin_available(self.account.get_balance())
+            self.account.set_margin_available(self.account.get_balance())
 
-        self.change_state_to_closed(trade)
+            self.change_state_to_closed(trade)
 
-        order.set_stream_row(row)
-        outcome = OutcomeModel(
-            trade=trade,
-            order=order,
-            initial_balance=initial_balance,
-            final_balance=self.account.get_balance()
-        )
-        self.outcomes.append(outcome)
+            order.set_stream_row(row)
+            outcome = OutcomeModel(
+                trade=trade,
+                order=order,
+                initial_balance=initial_balance,
+                final_balance=self.account.get_balance()
+            )
+            self.outcomes.append(outcome)
 
-        return True
+            return True
 
     def calc_pips_difference(self, trade, row):
         # TODO : multipler will change based on currency cross

@@ -66,8 +66,8 @@ class Processor(BaseObject):
         Il che dovrebbe essere corretto per i backtest.
         capire live
         """
-        self.telegram.send("evento ricevuto")
-        print("evento ricevuto")
+        # self.telegram.send("evento ricevuto")
+        print("evento ricevuto" + str(position_type))
 
         trades = self.broker.trade_manager.get_open_trade()
         if len(trades) == 1:
@@ -77,26 +77,17 @@ class Processor(BaseObject):
             if position_type is trade.position_type:
                 return
             else:
-                result = self.broker.trade_manager.close_trade_without_order(
-                    trade=trade,
-                    order=OrderModel(
-                        order_id=len(self.broker.order_manager.orders),
-                        trade_id=trade.trade_id,
-                        price=None,
-                        state=Status.OPEN,
-                        order_type=OrderType.FORCED_CLOSURE
-                    )
-                )
-                if result:
-                    self.broker.order_manager.close_related_orders_by_trade_id(trade.trade_id)
-
+                self.broker.trade_manager.close_all_trade()
+                self.broker.order_manager.close_related_orders_by_trade_id(trade.trade_id)
                 self.open_trade(position_type)
+                pass
         elif len(trades) == 0:
             # print("sei nella if trades == 0")
             self.open_trade(position_type)
         elif len(trades) > 1:
             # TODO chiudere tutto
-            print("sei nella else trades > 1")
+            # print("sei nella else trades > 1")
+            self.broker.trade_manager.close_all_trade()
             self.logger.write_error("Errore ho trovato più di un trade aperto", self.__class__.__name__, inspect.stack()[0][3])
             exit()
 

@@ -47,3 +47,9 @@ class OandaBrokerOrder(BrokerOrder):
                 return True, trade_id
 
             return True, None
+
+    def close_related_orders_by_trade_id(self, trade_id):
+        '''
+        metodo inutile. Serve solo ad allineare live e backtest
+        '''
+        pass
