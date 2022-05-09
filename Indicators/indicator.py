@@ -1,6 +1,4 @@
 import inspect
-from interface import implements
-from .indicator_interface import IndicatorInterface
 from Event import EventHook
 from Base import BaseObject
 
