@@ -8,6 +8,8 @@ from Domain.Enum import ProcessorType
 from Domain.Enum import InstrumentType
 from Domain.Enum import GranularityType
 
+processor_type = ProcessorType.live
+
 strategy = StrategyModel(
     strategy_name="EngulfingStrategy",
     indicators=[
@@ -28,27 +30,48 @@ strategy = StrategyModel(
     take_profit=60
 )
 
-data_feed = DataFeedModel(
-    InstrumentType.eurusd,
-    GranularityType.M30,
-    start_date=datetime.datetime(2022, 2, 2, 0, 0, 0),
-    end_date=datetime.datetime(2022, 2, 3, 0, 0, 0),
-    stream_granularity=GranularityType.M1
-)
+# strategy = StrategyModel(
+#     strategy_name="RandomStrategy",
+#     indicators=[
+#         IndicatorModel(
+#             "RandomIndicator",
+#             {},
+#         )
+#     ],
+#     stop_loss=20,
+#     take_profit=60
+# )
 
-args_qu4nt = {
-    "currency": "EUR",
-    "balance": 1000,
-    "leverage": 30,
-    # "type_of_money_management": MoneyManagementType.ALL_IN
-}
-broker = BrokerModel(
-    "Qu4ntBroker",
-    args_qu4nt
-)
+if processor_type is ProcessorType.backtest:
+    data_feed = DataFeedModel(
+        InstrumentType.eurusd,
+        GranularityType.M15,
+        start_date=datetime.datetime(2022, 2, 7, 0, 0, 0),
+        end_date=datetime.datetime(2022, 2, 8, 0, 0, 0),
+        stream_granularity=GranularityType.M1
+    )
+    args_qu4nt = {
+        "currency": "EUR",
+        "balance": 1000,
+        "leverage": 30,
+    }
+    broker = BrokerModel(
+        "Qu4ntBroker",
+        args_qu4nt
+    )
+elif processor_type is ProcessorType.live:
+    data_feed = DataFeedModel(
+        InstrumentType.eurusd,
+        GranularityType.S15,
+        count=10,
+    )
+    broker = BrokerModel(
+        "OandaBroker",
+        {}
+    )
 
 
-class ArgsBacktest:
+class Args:
     def __init__(self):
         parser = ArgumentParser()
         parser.add_argument('--processor_type', required=True, type=ProcessorType, choices=list(ProcessorType))
@@ -58,10 +81,9 @@ class ArgsBacktest:
         except:
             class FakeParameters:
                 def __init__(self):
-                    self.processor_type = ProcessorType.backtest
+                    self.processor_type = processor_type
                     self.data_feed = data_feed
                     self.strategy = strategy
                     self.broker = broker
 
             self.parameters = FakeParameters()
-
