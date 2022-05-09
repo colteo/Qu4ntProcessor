@@ -106,7 +106,6 @@ class Processor(BaseObject):
             return
 
         result, response = self.broker.market_order_request(
-            InstrumentType.eurusd.value,
             units
         )
         if result:

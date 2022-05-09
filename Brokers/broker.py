@@ -1,5 +1,6 @@
 from Base import BaseObject
 from Domain.Enum import OrderType
+from Services.Assistant import Assistant
 import uuid
 
 
@@ -8,6 +9,7 @@ class Broker(BaseObject):
     def __init__(self, args):
         super().__init__()
         self.args = args
+        self.instrument = self.args.parameters.data_feed.instrument
 
         self.id = str(uuid.uuid4())
 
@@ -23,8 +25,8 @@ class Broker(BaseObject):
         self.order_manager = None
         self.init_order_manager()
 
-    def market_order_request(self, instrument, units):
-        return self.order_manager.market_order_request(instrument, units)
+    def market_order_request(self, units):
+        return self.order_manager.market_order_request(self.instrument.value, units)
 
     def take_profit_order_request(self, trade_id, price):
         return self.order_manager.take_profit_order_request(trade_id, price)

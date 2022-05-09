@@ -1,7 +1,7 @@
 import oandapyV20
 import oandapyV20.endpoints.pricing as pricing
 from Services.DataFeed import DataFeed
-from Services.Assistant import AssistantDataframe
+from Services.Assistant import AssistantDataframe, Assistant
 from Brokers.broker_pricing_info import BrokerPricingInfo
 
 
@@ -12,8 +12,9 @@ class OandaBrokerPricingInfo(BrokerPricingInfo):
         self.account_id = account_id
         self.access_token = access_token
 
-        # TODO rimuovere
-        self.params = {"instruments": "EUR_USD"}
+        self.params = {
+            "instruments": self.args.parameters.data_feed.value
+        }
 
     def get_pricing_info(self):
         client = oandapyV20.API(access_token=self.access_token)
