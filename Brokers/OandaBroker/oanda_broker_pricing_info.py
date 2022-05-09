@@ -13,7 +13,7 @@ class OandaBrokerPricingInfo(BrokerPricingInfo):
         self.access_token = access_token
 
         self.params = {
-            "instruments": self.args.parameters.data_feed.value
+            "instruments": self.args.parameters.data_feed.instrument.value
         }
 
     def get_pricing_info(self):
