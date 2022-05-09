@@ -1,4 +1,5 @@
 from .engulfing_bullish_indicator import EngulfingBullishIndicator
 from .engulfing_bearish_indicator import EngulfingBearishIndicator
+from .random_indicator import RandomIndicator
 from .empty_indicator import EmptyIndicator
 
