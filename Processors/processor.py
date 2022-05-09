@@ -27,6 +27,25 @@ class Processor(BaseObject):
         self.init_communicator()
 
     def run(self):
+        self.logger.write_info(
+            "Inizio elaborazione",
+            self.__class__.__name__,
+            inspect.stack()[0][3]
+        )
+        self.broker.trade_manager.close_all_trade()
+        while True:
+            result, price = self.broker.pricing.get_current_middle_price()
+            # print(result, price)
+            if result is False and price is None:
+                break
+            elif result:
+                self.strategy.df = AssistantDataframe.add_row_to_dataframe(
+                    self.strategy.df,
+                    price,
+                    AssistantDataframe.columns_data_main_by_date()
+                )
+                self.strategy.next()
+                self.broker.handle()
         pass
 
     def init_broker(self):

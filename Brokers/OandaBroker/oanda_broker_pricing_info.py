@@ -34,7 +34,12 @@ class OandaBrokerPricingInfo(BrokerPricingInfo):
                 )
                 return True, row
 
-        return False, None
+        '''
+        a differenza del backtest qui restituisco un 
+        oggetto empty per evitare il blocco
+        del processor.run
+        '''
+        return False, object()
 
     def get_current_ask(self):
         pricing_info = self.get_pricing_info()

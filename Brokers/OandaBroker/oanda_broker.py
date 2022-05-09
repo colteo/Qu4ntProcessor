@@ -1,4 +1,5 @@
 import configparser
+import time
 from Brokers.broker import Broker
 from .oanda_broker_pricing_info import OandaBrokerPricingInfo
 from .oanda_broker_account import OandaBrokerAccount
@@ -34,3 +35,6 @@ class OandaBroker(Broker):
     def init_trade_manager(self):
         account_id, access_token = self.init_config_values()
         self.trade_manager = OandaTradeBroker(self.args, account_id, access_token)
+
+    def handle(self):
+        time.sleep(5)

@@ -82,3 +82,6 @@ class Qu4ntBroker(Broker):
             return self.trade_manager.close_trade(trade, order, row)
         pass
 
+    def handle(self):
+        if len(self.trade_manager.get_open_trade()) > 0:
+            self.check_trade_and_related_orders()
