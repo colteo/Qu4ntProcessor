@@ -63,3 +63,4 @@ class OandaTradeBroker:
                 None
             )
             list_of_trade.append(new_trade)
+        return list_of_trade
