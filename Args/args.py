@@ -1,89 +1,33 @@
-import datetime
 from argparse import ArgumentParser
-from Domain.Entities import BrokerModel
-from Domain.Entities import DataFeedModel
-from Domain.Entities import StrategyModel
-from Domain.Entities import IndicatorModel
-from Domain.Enum import ProcessorType
-from Domain.Enum import InstrumentType
-from Domain.Enum import GranularityType
-
-processor_type = ProcessorType.live
-
-strategy = StrategyModel(
-    strategy_name="EngulfingStrategy",
-    indicators=[
-        IndicatorModel(
-            "EngulfingBullishIndicator",
-            {
-                "candles": ["three", "two", "one"]
-            },
-        ),
-        IndicatorModel(
-            "EngulfingBearishIndicator",
-            {
-                "candles": ["three", "two", "one"]
-            },
-        )
-    ],
-    stop_loss=20,
-    take_profit=60
-)
-
-# strategy = StrategyModel(
-#     strategy_name="RandomStrategy",
-#     indicators=[
-#         IndicatorModel(
-#             "RandomIndicator",
-#             {},
-#         )
-#     ],
-#     stop_loss=20,
-#     take_profit=60
-# )
-
-if processor_type is ProcessorType.backtest:
-    data_feed = DataFeedModel(
-        InstrumentType.eurusd,
-        GranularityType.M15,
-        start_date=datetime.datetime(2022, 2, 7, 0, 0, 0),
-        end_date=datetime.datetime(2022, 2, 8, 0, 0, 0),
-        stream_granularity=GranularityType.M1
-    )
-    args_qu4nt = {
-        "currency": "EUR",
-        "balance": 1000,
-        "leverage": 30,
-    }
-    broker = BrokerModel(
-        "Qu4ntBroker",
-        args_qu4nt
-    )
-elif processor_type is ProcessorType.live:
-    data_feed = DataFeedModel(
-        InstrumentType.eurusd,
-        GranularityType.S15,
-        count=10,
-    )
-    broker = BrokerModel(
-        "OandaBroker",
-        {}
-    )
+from Base.base_object import BaseObject
+from Args.manual_settings import ManualSettings
+from Args.api_settings import ApiSettings
+import inspect
 
 
-class Args:
+class Args(BaseObject):
     def __init__(self):
-        parser = ArgumentParser()
-        parser.add_argument('--processor_type', required=True, type=ProcessorType, choices=list(ProcessorType))
+        super().__init__()
+        self.parser = ArgumentParser()
+        self.parameters = self.get_args()
 
+    def get_args(self):
+        self.parser.add_argument('--manual_mode', required=False, default=False, choices=["True", "False"],
+                                 help="Manual mode allow settings load from static file.")
+        self.parser.add_argument('--settings_id', required=False, default=None,
+                                 help="Settings ID for retrieving Qu4nt settings")
         try:
-            self.parameters = parser.parse_args()
-        except:
-            class FakeParameters:
-                def __init__(self):
-                    self.processor_type = processor_type
-                    self.data_feed = data_feed
-                    self.strategy = strategy
-                    self.broker = broker
+            args = self.parser.parse_args()
+            if self.is_manual_setup(args):
+                return ManualSettings().parameters
+            else:
+                return ApiSettings(args.settings_id).parameters
+        except Exception as e:
+            self.logger.write_error("Parse args problems. Exception: {}".format(e),
+                                    self.__class__.__name__, inspect.stack()[0][3])
+            exit(e)
 
-            self.parameters = FakeParameters()
+    def is_manual_setup(self, args):
+        if args.manual_mode is False and args.settings_id is None:
+            self.parser.error("Without settings_id, manual_mode is required to be True.")
+        return args.manual_mode

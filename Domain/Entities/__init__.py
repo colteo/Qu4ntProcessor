@@ -6,4 +6,4 @@ from .broker_model import BrokerModel
 from .trade_model import TradeModel
 from .order_model import OrderModel
 from .outcome_model import OutcomeModel
-
+from .parameters_model import ParametersModel

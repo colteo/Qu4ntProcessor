@@ -1,0 +1,79 @@
+import requests
+import configparser
+import inspect
+import datetime
+from Base.base_object import BaseObject
+from Domain.Entities import ParametersModel
+from Domain.Entities import BrokerModel
+from Domain.Entities import DataFeedModel
+from Domain.Entities import StrategyModel
+from Domain.Entities import IndicatorModel
+from Domain.Enum import ProcessorType
+from Domain.Enum import InstrumentType
+from Domain.Enum import GranularityType
+
+
+class ApiSettings(BaseObject):
+    def __init__(self, settings_id):
+        super().__init__()
+        self.parameters = self.get_parameters(settings_id)
+
+    @staticmethod
+    def get_config_file():
+        config_parser = configparser.ConfigParser()
+        config_parser.read('config.ini')
+        return config_parser['processor_api']
+
+    def get_settings_from_api(self, settings_id):
+        processor_api_config = self.get_config_file()
+        try:
+            url = "{}/{}".format(processor_api_config['url_get_settings'], settings_id)
+            return requests.get(url).json()
+        except Exception as e:
+            self.logger.write_error("Processor API non configurato. Exception: {}".format(e),
+                                    self.__class__.__name__, inspect.stack()[0][3])
+            exit(e)
+
+    def get_parameters(self, settings_id):
+        settings = self.get_settings_from_api(settings_id)
+        return ParametersModel(self.map_settings(settings))
+
+    def map_parameters(self, settings):
+        processor_type = ProcessorType(settings["TypeOfProcessor"])
+        data_feed = ApiSettings.get_datafeed_model(settings["Feed"])
+        strategy = ApiSettings.get_strategy_model(settings["Strategy"])
+        broker = ApiSettings.get_broker_model(settings["Broker"])
+        return processor_type, data_feed, strategy, broker
+
+    @staticmethod
+    def get_datafeed_model(feed):
+        return DataFeedModel(
+            instrument=InstrumentType(feed['Instrument']),
+            granularity=GranularityType(feed['Granularity']),
+            start_date=datetime.strptime(feed['StartDate'], '%Y-%m-%dT%H:%M:%S'),
+            end_date=datetime.strptime(feed['StartDate'], '%Y-%m-%dT%H:%M:%S'),
+            stream_granularity=GranularityType(feed['StreamGranularity'])
+        )
+
+    @staticmethod
+    def get_strategy_model(strategy):
+        return StrategyModel(
+            strategy_name=strategy["Name"],
+            indicators=[ApiSettings.get_indicator_model(indicator) for indicator in strategy['Indicators']],
+            stop_loss=strategy["StopLoss"],
+            take_profit=strategy["TakeProfit"]
+        )
+
+    @staticmethod
+    def get_indicator_model(indicator):
+        return IndicatorModel(
+            indicator["Name"],
+            [{arg['Key']: arg['Value']} for arg in indicator["Args"]]
+        )
+
+    @staticmethod
+    def get_broker_model(broker):
+        return BrokerModel(
+            broker["Name"],
+            [{arg['Key']: arg['Value']} for arg in broker["Args"]]
+        )
