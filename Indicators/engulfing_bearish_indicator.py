@@ -18,18 +18,18 @@ class EngulfingBearishIndicator(Indicator):
     def next(self):
 
         if len(self.df) > 3:
-            if "three" in self.args["candles"]:
+            if self.check_arg('candles_three'):
                 self.bearish_signal_three = (
                         self.df.Close[-4] > self.df.Open[-4]
                         and self.df.Close[-3] > self.df.Open[-3]
                         and self.df.Close[-2] > self.df.Open[-2] > self.df.Close[-1]
                 )
-            if "two" in self.args["candles"]:
+            if self.check_arg('candles_two'):
                 self.bearish_signal_two = (
                         self.df.Close[-3] > self.df.Open[-3]
                         and self.df.Close[-2] > self.df.Open[-2] > self.df.Close[-1]
                 )
-            if "one" in self.args["candles"]:
+            if self.check_arg('candles_one'):
                 self.bearish_signal_one = (
                         self.df.Close[-2] > self.df.Open[-2] > self.df.Close[-1]
                 )
@@ -77,4 +77,6 @@ class EngulfingBearishIndicator(Indicator):
                 )
                 self.indicator_event.fire(PositionType.SHORT)
 
+    def check_arg(self, arg):
+        return True if self.args.get(arg) == 'yes' else False
 

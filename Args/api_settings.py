@@ -1,7 +1,7 @@
 import requests
 import configparser
 import inspect
-import datetime
+from datetime import datetime
 from Base.base_object import BaseObject
 from Domain.Entities import ParametersModel
 from Domain.Entities import BrokerModel
@@ -36,9 +36,10 @@ class ApiSettings(BaseObject):
 
     def get_parameters(self, settings_id):
         settings = self.get_settings_from_api(settings_id)
-        return ParametersModel(self.map_settings(settings))
+        return ParametersModel(ApiSettings.map_parameters(settings))
 
-    def map_parameters(self, settings):
+    @staticmethod
+    def map_parameters(settings):
         processor_type = ProcessorType(settings["TypeOfProcessor"])
         data_feed = ApiSettings.get_datafeed_model(settings["Feed"])
         strategy = ApiSettings.get_strategy_model(settings["Strategy"])
@@ -51,7 +52,7 @@ class ApiSettings(BaseObject):
             instrument=InstrumentType(feed['Instrument']),
             granularity=GranularityType(feed['Granularity']),
             start_date=datetime.strptime(feed['StartDate'], '%Y-%m-%dT%H:%M:%S'),
-            end_date=datetime.strptime(feed['StartDate'], '%Y-%m-%dT%H:%M:%S'),
+            end_date=datetime.strptime(feed['EndDate'], '%Y-%m-%dT%H:%M:%S'),
             stream_granularity=GranularityType(feed['StreamGranularity'])
         )
 
@@ -66,14 +67,18 @@ class ApiSettings(BaseObject):
 
     @staticmethod
     def get_indicator_model(indicator):
+        result = {}
+        [result.update({arg['Key']: arg['Value']}) for arg in indicator["Args"]]
         return IndicatorModel(
             indicator["Name"],
-            [{arg['Key']: arg['Value']} for arg in indicator["Args"]]
+            result
         )
 
     @staticmethod
     def get_broker_model(broker):
+        result = {}
+        [result.update({arg['Key']: arg['Value']}) for arg in broker["Args"]]
         return BrokerModel(
             broker["Name"],
-            [{arg['Key']: arg['Value']} for arg in broker["Args"]]
+            result
         )

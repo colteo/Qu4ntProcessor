@@ -20,10 +20,10 @@ class Qu4ntBrokerAccount(BrokerAccount, metaclass=Singleton):
         
     def init_values(self):
         self.set_currency(self.args.parameters.broker.args["currency"])
-        self.set_initial_balance(self.args.parameters.broker.args["balance"])
-        self.set_balance(self.args.parameters.broker.args["balance"])
-        self.set_margin_available(self.args.parameters.broker.args["balance"])
-        self.set_leverage(self.args.parameters.broker.args["leverage"])
+        self.set_initial_balance(int(self.args.parameters.broker.args["balance"]))
+        self.set_balance(int(self.args.parameters.broker.args["balance"]))
+        self.set_margin_available(int(self.args.parameters.broker.args["balance"]))
+        self.set_leverage(int(self.args.parameters.broker.args["leverage"]))
 
     def set_currency(self, currency):
         self.currency = currency
