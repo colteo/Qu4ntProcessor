@@ -36,7 +36,8 @@ class ApiSettings(BaseObject):
 
     def get_parameters(self, settings_id):
         settings = self.get_settings_from_api(settings_id)
-        return ParametersModel(ApiSettings.map_parameters(settings))
+        processor_type, data_feed, strategy, broker = ApiSettings.map_parameters(settings)
+        return ParametersModel(processor_type, data_feed, strategy, broker)
 
     @staticmethod
     def map_parameters(settings):
