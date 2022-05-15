@@ -26,26 +26,16 @@ class Logger(metaclass=Singleton):
         # self.write_info('Logger init')
 
     def write_info(self, message, sender_class=None):
-        logging.info(self._write(message, sender_class))
+        logging.info(self._write(message))
 
     def write_error(self, message, sender_class=None):
-        logging.error(self._write(message, sender_class))
+        logging.error(self._write(message))
 
-    def _write(self, message, sender_class) -> str:
-        result = ""
-
-        sender = "Sender: not defined - "
-        if sender_class is not None:
-            sender = "Sender: " + sender_class + " - "
-        result += sender
-
-        method_name = "Method: " + inspect.stack()[2][3]
-        result += method_name
-
-        message = "Message: " + message
-        result += message
-
-        return result
+    def _write(self, message) -> str:
+        stack = inspect.stack()
+        sender = stack[2][0].f_locals["self"].__class__.__name__
+        method = stack[2][0].f_code.co_name
+        return "Sender: {} - Method: {} - Message {}".format(sender, method, message)
 
     def get_logs_path(self):
         this_file_path = os.path.dirname(os.path.dirname(__file__))
