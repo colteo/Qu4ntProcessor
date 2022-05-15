@@ -18,8 +18,7 @@ class ApiSettings(BaseObject):
         super().__init__()
         self.parameters = self.get_parameters(settings_id)
 
-    @staticmethod
-    def get_config_file():
+    def get_config_file(self):
         config_parser = configparser.ConfigParser()
         config_parser.read('config.ini')
         return config_parser['processor_api']
@@ -39,16 +38,14 @@ class ApiSettings(BaseObject):
         processor_type, data_feed, strategy, broker = ApiSettings.map_parameters(settings)
         return ParametersModel(processor_type, data_feed, strategy, broker)
 
-    @staticmethod
-    def map_parameters(settings):
+    def map_parameters(self, settings):
         processor_type = ProcessorType(settings["TypeOfProcessor"])
-        data_feed = ApiSettings.get_datafeed_model(settings["Feed"])
-        strategy = ApiSettings.get_strategy_model(settings["Strategy"])
-        broker = ApiSettings.get_broker_model(settings["Broker"])
+        data_feed = self.get_datafeed_model(settings["Feed"])
+        strategy = self.get_strategy_model(settings["Strategy"])
+        broker = self.get_broker_model(settings["Broker"])
         return processor_type, data_feed, strategy, broker
 
-    @staticmethod
-    def get_datafeed_model(feed):
+    def get_datafeed_model(self, feed):
         return DataFeedModel(
             instrument=InstrumentType(feed['Instrument']),
             granularity=GranularityType(feed['Granularity']),
@@ -57,17 +54,15 @@ class ApiSettings(BaseObject):
             stream_granularity=GranularityType(feed['StreamGranularity'])
         )
 
-    @staticmethod
-    def get_strategy_model(strategy):
+    def get_strategy_model(self, strategy):
         return StrategyModel(
             strategy_name=strategy["Name"],
-            indicators=[ApiSettings.get_indicator_model(indicator) for indicator in strategy['Indicators']],
+            indicators=[self.get_indicator_model(indicator) for indicator in strategy['Indicators']],
             stop_loss=strategy["StopLoss"],
             take_profit=strategy["TakeProfit"]
         )
 
-    @staticmethod
-    def get_indicator_model(indicator):
+    def get_indicator_model(self, indicator):
         result = {}
         [result.update({arg['Key']: arg['Value']}) for arg in indicator["Args"]]
         return IndicatorModel(
@@ -75,8 +70,7 @@ class ApiSettings(BaseObject):
             result
         )
 
-    @staticmethod
-    def get_broker_model(broker):
+    def get_broker_model(self, broker):
         result = {}
         [result.update({arg['Key']: arg['Value']}) for arg in broker["Args"]]
         return BrokerModel(
