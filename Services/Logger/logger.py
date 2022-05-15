@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 import uuid
+import os
 from Services.Assistant import AssistantFilesystem
 from Singleton import Singleton
 
@@ -9,11 +10,15 @@ class Logger(metaclass=Singleton):
 
     def __init__(self):
         self.id = str(uuid.uuid4())
-        AssistantFilesystem.remove_all('Logs')
+        logs_path = self.get_logs_path()
+
         current_datetime = datetime.today().strftime("%Y-%m-%d-%H-%M-%S")
+        filename = os.path.join(logs_path, '.'.join((current_datetime, "log")))
+
+        AssistantFilesystem.remove_all(logs_path)
         logging.basicConfig(
             format='%(asctime)s %(levelname)s %(message)s',
-            filename='Logs/' + current_datetime + '.log',
+            filename=filename,
             datefmt='%Y-%m-%d %H:%M:%S',
             level=logging.INFO,
         )
@@ -43,6 +48,9 @@ class Logger(metaclass=Singleton):
 
         return result
 
+    def get_logs_path(self):
+        this_file_path = os.path.dirname(os.path.dirname(__file__))
+        return os.path.abspath(os.path.join(this_file_path, os.pardir, "Logs", ""))
 
 
 
