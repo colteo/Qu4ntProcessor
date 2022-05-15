@@ -4,6 +4,7 @@ import uuid
 import os
 from Services.Assistant import AssistantFilesystem
 from Singleton import Singleton
+import inspect
 
 
 class Logger(metaclass=Singleton):
@@ -24,13 +25,13 @@ class Logger(metaclass=Singleton):
         )
         # self.write_info('Logger init')
 
-    def write_info(self, message, sender_class=None, method_name=None):
-        logging.info(self._write(message, sender_class, method_name))
+    def write_info(self, message, sender_class=None):
+        logging.info(self._write(message, sender_class))
 
-    def write_error(self, message, sender_class=None, method_name=None):
-        logging.error(self._write(message, sender_class, method_name))
+    def write_error(self, message, sender_class=None):
+        logging.error(self._write(message, sender_class))
 
-    def _write(self, message, sender_class, method_name) -> str:
+    def _write(self, message, sender_class) -> str:
         result = ""
 
         sender = "Sender: not defined - "
@@ -38,10 +39,8 @@ class Logger(metaclass=Singleton):
             sender = "Sender: " + sender_class + " - "
         result += sender
 
-        method = "Method: not defined - "
-        if method_name is not None:
-            method = "Method: " + method_name + " - "
-        result += method
+        method_name = "Method: " + inspect.stack()[2][3]
+        result += method_name
 
         message = "Message: " + message
         result += message
