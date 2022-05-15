@@ -1,6 +1,7 @@
 import requests
 import configparser
 import inspect
+import os
 from datetime import datetime
 from Base.base_object import BaseObject
 from Domain.Entities import ParametersModel
@@ -19,8 +20,9 @@ class ApiSettings(BaseObject):
         self.parameters = self.get_parameters(settings_id)
 
     def get_config_file(self):
+        path = self.get_config_path()
         config_parser = configparser.ConfigParser()
-        config_parser.read('config.ini')
+        config_parser.read(path)
         return config_parser['processor_api']
 
     def get_settings_from_api(self, settings_id):
@@ -29,13 +31,12 @@ class ApiSettings(BaseObject):
             url = "{}/{}".format(processor_api_config['url_get_settings'], settings_id)
             return requests.get(url).json()
         except Exception as e:
-            self.logger.write_error("Processor API non configurato. Exception: {}".format(e),
-                                    self.__class__.__name__, inspect.stack()[0][3])
+            self.logger.write_error("Processor API non configurato. Exception: {}".format(e))
             exit(e)
 
     def get_parameters(self, settings_id):
         settings = self.get_settings_from_api(settings_id)
-        processor_type, data_feed, strategy, broker = ApiSettings.map_parameters(settings)
+        processor_type, data_feed, strategy, broker = self.map_parameters(settings)
         return ParametersModel(processor_type, data_feed, strategy, broker)
 
     def map_parameters(self, settings):
@@ -77,3 +78,7 @@ class ApiSettings(BaseObject):
             broker["Name"],
             result
         )
+
+    def get_config_path(self):
+        this_file_path = os.path.dirname(os.path.dirname(__file__))
+        return os.path.abspath(os.path.join(this_file_path, "config.ini"))

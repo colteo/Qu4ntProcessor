@@ -4,6 +4,7 @@ from Services.Assistant import Assistant
 from .html_printer import HTMLPrinter
 import json
 import configparser
+import os
 
 
 class OutcomesManager(BaseObject):
@@ -43,7 +44,7 @@ class OutcomesManager(BaseObject):
         post_data = json.dumps(post_data)
 
         config_parser = configparser.ConfigParser()
-        config_parser.read('config.ini')
+        config_parser.read(self.get_config_path())
         url_add_strategy = config_parser["server_api"]["url_add_strategy"]
 
         headers = {
@@ -83,7 +84,7 @@ class OutcomesManager(BaseObject):
         post_data = json.dumps(post_data)
 
         config_parser = configparser.ConfigParser()
-        config_parser.read('config.ini')
+        config_parser.read(self.get_config_path())
         url_add_outcome = config_parser["server_api"]["url_add_outcome"]
 
         headers = {
@@ -104,7 +105,7 @@ class OutcomesManager(BaseObject):
         post_data = json.dumps(post_data)
 
         config_parser = configparser.ConfigParser()
-        config_parser.read('config.ini')
+        config_parser.read(self.get_config_path())
         url_set_strategy_completed = config_parser["server_api"]["url_set_strategy_completed"]
 
         headers = {
@@ -117,3 +118,7 @@ class OutcomesManager(BaseObject):
             data=post_data,
             headers=headers
         )
+
+    def get_config_path(self):
+        this_file_path = os.path.dirname(os.path.dirname(__file__))
+        return os.path.abspath(os.path.join(this_file_path, os.pardir, "config.ini"))

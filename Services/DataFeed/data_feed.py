@@ -1,6 +1,7 @@
 from oandapyV20 import API
 import oandapyV20.endpoints.trades as trades
 import oandapyV20.endpoints.instruments as instruments
+import inspect
 import tpqoa
 import os
 import json
@@ -9,14 +10,19 @@ import configparser
 from Services.Assistant import Assistant, AssistantDataframe, AssistantFilesystem
 from Domain.Entities import DataFeedModel
 from Domain.Enum import GranularityType
+from Base import BaseObject
 
 
-class DataFeed:
-    path = 'csv/'
+class DataFeed(BaseObject):
 
-    def __init__(self, model: DataFeedModel):
-        if not os.path.exists(self.path):
-            os.mkdir(self.path)
+    def __init__(self, model):
+        super().__init__()
+
+        self.csv_path = self.get_csv_path()
+        if not os.path.exists(self.csv_path):
+            os.mkdir(self.csv_path)
+
+        self.config_path = self.get_config_path()
 
         self.account_id = None
         self.access_token = None
@@ -31,7 +37,7 @@ class DataFeed:
         :return:
         '''
         config_parser = configparser.ConfigParser()
-        config_parser.read('oanda_default_account.ini')
+        config_parser.read(self.config_path)
         self.account_id = config_parser["oanda"]["account_id"]
         self.access_token = config_parser["oanda"]["access_token"]
         pass
@@ -80,6 +86,7 @@ class DataFeed:
 
     # OPEN, HIGH, LOW, CLOSE (middle)
     def get_data_main_by_date_middle_price(self):
+
         datapath = self.get_data_path(
             self.model.instrument,
             self.model.start_date,
@@ -88,7 +95,7 @@ class DataFeed:
         )
 
         if AssistantFilesystem.file_exist(datapath) is False:
-            api = tpqoa.tpqoa("oanda_default_account.ini")
+            api = tpqoa.tpqoa(self.config_path)
 
             price = api.get_history(
                 instrument=self.model.instrument.value,
@@ -134,7 +141,7 @@ class DataFeed:
         )
 
         if AssistantFilesystem.file_exist(datapath) is False:
-            api = tpqoa.tpqoa("oanda_default_account.ini")
+            api = tpqoa.tpqoa(self.config_path)
 
             # BID calculated on askclose price
             bid = api.get_history(
@@ -192,7 +199,8 @@ class DataFeed:
         start_end = "2021-12-31"
         timeframe = "H1" # "M5", "H1, "D"
         '''
-        return os.path.join(self.path, self.filename(instrument_name, start_date, end_date, timeframe))
+        path = os.path.join(self.csv_path, self.filename(instrument_name, start_date, end_date, timeframe))
+        return path
 
     def filename(self, instrument_name, start_date, end_date, granularity):
         filename = str(instrument_name) + "-" + str(start_date) + "-" + str(end_date) + "_" + str(granularity)
@@ -212,3 +220,12 @@ class DataFeed:
         )
 
         return dataframe
+
+    def get_config_path(self):
+        this_file_path = os.path.dirname(os.path.dirname(__file__))
+        return os.path.abspath(os.path.join(this_file_path, os.pardir, "oanda_default_account.ini"))
+
+    def get_csv_path(self):
+        this_file_path = os.path.dirname(os.path.dirname(__file__))
+        return os.path.abspath(os.path.join(this_file_path, os.pardir, "csv"))
+

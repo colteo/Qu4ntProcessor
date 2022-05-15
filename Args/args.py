@@ -23,8 +23,7 @@ class Args(BaseObject):
             else:
                 return ApiSettings(args.settings_id).parameters
         except Exception as e:
-            self.logger.write_error("Parse args problems. Exception: {}".format(e),
-                                    self.__class__.__name__, inspect.stack()[0][3])
+            self.logger.write_error("Parse args problems. Exception: {}".format(e))
             exit(e)
 
     def is_manual_setup(self, args):

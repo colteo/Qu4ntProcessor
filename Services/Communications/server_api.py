@@ -4,6 +4,7 @@ import json
 import inspect
 import requests
 import configparser
+import os
 
 
 class ServerAPI(BaseObject):
@@ -16,7 +17,7 @@ class ServerAPI(BaseObject):
     def init(self):
         try:
             config_parser = configparser.ConfigParser()
-            config_parser.read('config.ini')
+            config_parser.read(self.get_config_path())
             check_url = config_parser["server_api"]["check_url"]
 
             response = requests.get(check_url)
@@ -24,8 +25,10 @@ class ServerAPI(BaseObject):
 
             if content == "OK":
                 self.__is_on = True
+
+
         except:
-            self.logger.write_error("Server API non configurato", self.__class__.__name__, inspect.stack()[0][3])
+            self.logger.write_error("Server API non configurato")
 
     def post_request(self, url, data, headers):
         if self.__is_on:
@@ -37,3 +40,7 @@ class ServerAPI(BaseObject):
             content = response.content
             return content
         return None
+
+    def get_config_path(self):
+        this_file_path = os.path.dirname(os.path.dirname(__file__))
+        return os.path.abspath(os.path.join(this_file_path, os.pardir, "config.ini"))

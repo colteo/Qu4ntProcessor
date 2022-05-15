@@ -2,6 +2,7 @@ from Base import BaseObject
 from Domain.Enum import OrderType
 from Services.Assistant import Assistant
 import uuid
+import inspect
 
 
 class Broker(BaseObject):

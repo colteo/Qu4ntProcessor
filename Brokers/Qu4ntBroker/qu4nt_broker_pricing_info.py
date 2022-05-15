@@ -1,4 +1,5 @@
 import inspect
+import json
 from Base import BaseObject
 from Domain.Enum import ProcessorType
 from Services.DataFeed import DataFeed
@@ -10,6 +11,7 @@ class Qu4ntBrokerPricingInfo(BrokerPricingInfo, metaclass=Singleton):
 
     def __init__(self, args):
         super().__init__(args)
+
         self.index = 0
         self.last_price_time = None
 

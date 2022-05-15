@@ -27,11 +27,7 @@ class Processor(BaseObject):
         self.init_communicator()
 
     def run(self):
-        self.logger.write_info(
-            "Inizio elaborazione",
-            self.__class__.__name__,
-            inspect.stack()[0][3]
-        )
+        self.logger.write_info("Inizio elaborazione")
         self.broker.trade_manager.close_all_trade()
         while True:
             result, price = self.broker.pricing.get_current_middle_price()
@@ -64,7 +60,6 @@ class Processor(BaseObject):
             strategy = None
 
         if strategy is None:
-            # self.logger.write_info("Inizializzo strategia vuota", self.__class__.__name__, inspect.stack()[0][3])
             self.strategy = EmptyStrategy(self.args)
         else:
             class_ = getattr(sys.modules[__name__], strategy.strategy_name)
@@ -107,7 +102,7 @@ class Processor(BaseObject):
             # TODO chiudere tutto
             # print("sei nella else trades > 1")
             self.broker.trade_manager.close_all_trade()
-            self.logger.write_error("Errore ho trovato più di un trade aperto", self.__class__.__name__, inspect.stack()[0][3])
+            self.logger.write_error("Errore ho trovato più di un trade aperto")
             exit()
 
     def open_trade(self, position_type):
