@@ -14,9 +14,9 @@ class Logger(metaclass=Singleton):
         logs_path = self.get_logs_path()
 
         current_datetime = datetime.today().strftime("%Y-%m-%d-%H-%M-%S")
-        filename = os.path.join(logs_path, '.'.join((current_datetime, "log")))
+        filename = os.path.join(logs_path, '.'.join((current_datetime+"_"+self.id, "log")))
 
-        AssistantFilesystem.remove_all(logs_path)
+        # AssistantFilesystem.remove_all(logs_path)
         logging.basicConfig(
             format='%(asctime)s %(levelname)s %(message)s',
             filename=filename,
